@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import noisereduce as nr
 from IOHandler import Audio
-
+from statsmodels.graphics.tsaplots import plot_acf
 class AudioProcessor:
 
 	def __init__(self, filename):
@@ -24,4 +24,14 @@ class AudioProcessor:
 		
 		reduced_noise = nr.reduce_noise(audio_clip=self.y, noise_clip=noise_clip.y)
 		return reduced_noise
-	
+
+class PitchClassifier(AudioProcessor):
+
+	def get_pitches_from_wav(self):
+		self.estimate_autocorrelation(tau=3, window_length=245)
+		plot_acf(self.y)
+		plt.show()
+
+	def yin_algorithm(self):
+		# Step 1. Autocorrelation method
+		at = np.fft.fft(self.y)
