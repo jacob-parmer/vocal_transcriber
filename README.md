@@ -1,2 +1,2 @@
 # vocal_transcriber
-Transcribe vocal performance in real time to sheet music
+Transcribe vocal performance to sheet music [WIP]
