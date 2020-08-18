@@ -1,0 +1,55 @@
+Need:
+	- collect audio data either from recording or existing file
+	- process audio data
+	- output to sheet music
+
+
+Objects:
+
+	Audio: 
+		Contains:
+		string adFilename
+		int adSampleRate
+		double* adTimeSeries
+	
+		Methods:
+		record() - record audio input from microphone
+		loadAudio() - load audio input from file
+		setFilename() - sets adFilename parameter after initialization
+
+	Pitch:
+		Contains:
+		int f0
+		string name
+		int frameLength
+
+		Methods:
+		setF0() - sets the value of the fundamental frequency of the pitch
+		setName() - sets the pitch name
+		setFrameLength() - sets the length of the frame
+
+	Pitch::Note:
+		Contains:
+		string noteType
+		Pitch pitch
+	
+		Methods:
+		setNoteType() - sets noteType
+		setPitch() - sets pitch after init
+
+
+	ScoreUtil:
+		Contains:
+		Pitch[] pitches
+		double[] beatTimes
+		int sampleRate
+		int frameSize
+
+	Score:
+		Contains:
+		Note[] notes
+		bool Clef
+		int timeSigTop
+		int timeSigBot
+
+	
