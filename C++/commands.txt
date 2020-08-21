@@ -1,4 +1,4 @@
 g++ -std=c++11 -c Audio.cpp
-g++ Audio.o portaudio.h libportaudio.a -lrt -lm -lasound -pthread -o Audio.exec
+g++ Audio.o portaudio.h libportaudio.a -lrt -lm -lasound -pthread -lsndfile -o Audio.exec
 ./Audio.exec
 
