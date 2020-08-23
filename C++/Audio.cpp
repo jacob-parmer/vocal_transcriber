@@ -2,9 +2,10 @@
 #include <stdio.h>
 #include <iostream>
 #include <sndfile.h>
+#include <cstring>
 
-static const int NUM_CHANNELS = 1;
-static const PaSampleFormat PA_SAMPLE_FORMAT = paFloat32;
+static const int NUM_CHANNELS = 2;
+static const PaSampleFormat SAMPLE_FORMAT = paFloat32;
 static const int SAMPLE_SIZE = 4;
 static const int SAMPLE_RATE = 44100;
 static const int FRAMES_PER_BUFFER = 512;
@@ -13,11 +14,12 @@ class Audio {
 
 	private:
 		PaStreamParameters inputParameters, outputParameters;
-
+		SF_INFO fileParameters;
 	public:
-		Audio();
+	Audio();
 		virtual ~Audio();
-		int record();
+		int record(int seconds);
+		void writeWAV(float *value, const char* filename);
 		void error(PaError errorCode);
 };
 
@@ -36,13 +38,13 @@ Audio::Audio() {
 	// Set up PortAudio input and output to default devices
 	inputParameters.device = Pa_GetDefaultInputDevice();
 	inputParameters.channelCount = NUM_CHANNELS;
-	inputParameters.sampleFormat = PA_SAMPLE_FORMAT;
+	inputParameters.sampleFormat = SAMPLE_FORMAT;
 	inputParameters.suggestedLatency = Pa_GetDeviceInfo(inputParameters.device)->defaultHighInputLatency;
 	inputParameters.hostApiSpecificStreamInfo = NULL;
 
 	outputParameters.device = Pa_GetDefaultOutputDevice();
 	outputParameters.channelCount = NUM_CHANNELS;
-	outputParameters.sampleFormat = PA_SAMPLE_FORMAT;
+	outputParameters.sampleFormat = SAMPLE_FORMAT;
 	outputParameters.suggestedLatency = Pa_GetDeviceInfo(outputParameters.device)->defaultHighOutputLatency;
 
 }
@@ -52,13 +54,15 @@ Audio::~Audio() {
 	if (errorCode != paNoError) { error(errorCode); }
 }
 
-int Audio::record() {
+int Audio::record(int seconds) {
 
 	PaStream *stream = NULL;
-	char *sampleBlock = NULL;
+	float *sampleBlock = NULL;
 	int numBytes = FRAMES_PER_BUFFER * NUM_CHANNELS * SAMPLE_SIZE;
-	sampleBlock = (char *) malloc(numBytes);
+	sampleBlock = (float *) malloc(numBytes);
 
+	memset(sampleBlock, 0.0f, numBytes);
+	
 	// Set up stream
 	PaError errorCode = Pa_OpenStream(&stream, &inputParameters, &outputParameters, SAMPLE_RATE,
 		       			  FRAMES_PER_BUFFER, paClipOff, NULL, NULL);
@@ -68,22 +72,18 @@ int Audio::record() {
 	errorCode = Pa_StartStream(stream);
 	if (errorCode != paNoError) { error(errorCode); }
 
-
 	std::cout << "Recording...\n";
-	for (int i=0; i<(2*SAMPLE_RATE)/FRAMES_PER_BUFFER; ++i) {
-	
-		errorCode = Pa_WriteStream(stream, sampleBlock, FRAMES_PER_BUFFER);
-		if (errorCode != paNoError) { error(errorCode); }
-	
-		std::cout << sampleBlock << "\n";
-
+	for (int i=0; i<(seconds*SAMPLE_RATE)/FRAMES_PER_BUFFER; ++i) {
 		errorCode = Pa_ReadStream(stream, sampleBlock, FRAMES_PER_BUFFER);
 		if (errorCode != paNoError) { error(errorCode); }
 
-	
+		std::cout << *sampleBlock << "\n";
 	}
 
+	float *value{ static_cast<float*>(stream) };
+	std::cout << "Finished recording.\n";
 
+	Audio::writeWAV(value, "recording.wav");
 
 	// Stop Stream
 	errorCode = Pa_StopStream(stream);
@@ -97,14 +97,31 @@ int Audio::record() {
 
 }
 
+void Audio::writeWAV(float *value, const char* filename) {
+
+	memset (&fileParameters, 0, sizeof(fileParameters));
+	
+	SNDFILE *file; 	
+       
+	if (! (file = sf_open(filename, SFM_WRITE, &fileParameters))) {
+		printf("Not able to open output file %s.\n", filename);	
+	};
+
+
+
+
+	sf_close(file);
+}
+
 void Audio::error(PaError errorCode) {
 	std::cout << Pa_GetErrorText(errorCode) << "\n";
 }
 
 int main() {
 
+	int seconds = 5;
 	Audio* ad = new Audio();
-	int err = ad->record();
+	int err = ad->record(seconds);
 	delete ad;
 
 }
