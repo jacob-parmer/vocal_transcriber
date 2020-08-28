@@ -1,9 +1,6 @@
 #include "portaudio.h"
-#include <stdio.h>
 #include <iostream>
 #include <sndfile.h>
-#include <cstring>
-#include <vector>
 
 class AudioUtil;
 
