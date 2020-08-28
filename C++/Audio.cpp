@@ -1,11 +1,11 @@
 #include "Audio.h"
 
 #include "portaudio.h"
-#include <stdio.h>
-#include <iostream>
-#include <sndfile.h>
-#include <cstring>
-#include <vector>
+//#include <stdio.h>
+//#include <iostream>
+//#include <sndfile.h>
+//#include <cstring>
+//#include <vector>
 
 static const PaSampleFormat SAMPLE_FORMAT = paFloat32;
 
