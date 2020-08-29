@@ -38,10 +38,10 @@ int AudioUtil::record(int seconds) {
 
 /* Writes audio data to WAV using libsndfile. 
  *
- * PARAMS: filename (const char*) - name of the file to write to. This will overwrite
+ * PARAMS: filename (const char*) - Name of the file to write to. This will overwrite
  *				    if the file already exists.
  *
- * OUTPUTS: wav file with data loaded into AudioUtil object. 
+ * OUTPUTS: WAV file with data loaded into AudioUtil object. 
  *
  * RETURNS: -1 if an error occurred, 0 if not.
  *
@@ -71,16 +71,25 @@ int AudioUtil::writeWAV(const char* filename) {
 	return 0;
 }
 
+/* Reads WAV file into audio data vector using libsndfile.
+ *
+ * PARAMS: filename (const char*) - Name of the file to read from.
+ *
+ * OUTPUTS: Audio signal in data vector
+ * 	    
+ * RETURNS: -1 if function failed, 0 if not.
+ *
+ */
 int AudioUtil::readWAV(const char* filename) {
 	
 	int readcount;
 	float *buffer;
 
 	/* if we've previously wrote a WAV file, data is already loaded. This removes that
-	 * pre-existing data. */
+	 * pre-existing data. Not recommended, just make a new Audio object. */
 	if (!dataIsEmpty()) {
 		std::cout << "WARNING: Rewriting data with readWAV() w/o flushing beforehand.\n";
-		dataFlush();
+		Audio::dataFlush();
 	}
 
 	if (! (infile = sf_open(filename, SFM_READ, &sfinfo))) {
@@ -89,6 +98,7 @@ int AudioUtil::readWAV(const char* filename) {
 		return -1;
 
 	}
+
 	while ((readcount = sf_read_float(infile, buffer, framesPerBuffer))) {
 		std::cout << readcount << "\n";
 		
