@@ -1,19 +1,14 @@
 #include "Audio.h"
 
 #include "portaudio.h"
-//#include <stdio.h>
-//#include <iostream>
-//#include <sndfile.h>
-//#include <cstring>
-//#include <vector>
 
 static const PaSampleFormat SAMPLE_FORMAT = paFloat32;
+static const int SAMPLE_SIZE = 4; // 32 bit samples, 4 bytes
 
 Audio::Audio( int channelCount, int sampleRate, int framesPerBuffer) :
 			sampleRate(sampleRate),
 			framesPerBuffer(framesPerBuffer)
 {
-
 	// Display dependancy versions
 	char buffer [128];
 	sf_command(NULL, SFC_GET_LIB_VERSION, buffer, sizeof(buffer));
@@ -36,6 +31,12 @@ Audio::Audio( int channelCount, int sampleRate, int framesPerBuffer) :
 	outputParameters.sampleFormat = SAMPLE_FORMAT;
 	outputParameters.suggestedLatency = Pa_GetDeviceInfo(outputParameters.device)->defaultHighOutputLatency;
 
+	// Set up libsndfile parameters in variable sfinfo
+	memset(&sfinfo, 0, sizeof(sfinfo));
+
+	sfinfo.format = (SF_FORMAT_WAV | SF_FORMAT_FLOAT);
+	sfinfo.channels = channelCount;
+	sfinfo.samplerate = sampleRate;
 }
 
 Audio::~Audio() {
@@ -44,14 +45,31 @@ Audio::~Audio() {
 }
 
 void Audio::startStream() {
-	// Set up stream
 	PaError errorCode = Pa_OpenStream(&stream, &inputParameters, &outputParameters,
 					  sampleRate, framesPerBuffer, paClipOff, NULL, NULL);
 	if (errorCode != paNoError) { error(errorCode);}
 
-	// Start stream
 	errorCode = Pa_StartStream(stream);
 	if (errorCode != paNoError) { error(errorCode);}
+}
+
+void Audio::readStream(bool &stop) {
+	int sizeOfBuffer = framesPerBuffer * inputParameters.channelCount * SAMPLE_SIZE;
+	float *buffer = (float *) malloc(sizeOfBuffer);
+
+	memset(buffer, 0.0f, sizeOfBuffer);
+
+	while (!stop) {
+		PaError errorCode = Pa_ReadStream(stream, buffer, framesPerBuffer);
+		if (errorCode != paNoError) { error(errorCode); }
+
+		// loops through stored values in buffer
+		float* ptr = buffer;
+		for (int i=0; i<framesPerBuffer; ++i) {
+			data.push_back(*ptr);
+			ptr = ptr + 1;
+		}
+	}
 }
 
 void Audio::stopStream() {
@@ -64,20 +82,13 @@ void Audio::stopStream() {
 	if (errorCode != paNoError) { error(errorCode); }
 }
 
-PaStreamParameters Audio::getInputParameters() {
-	return inputParameters;
+bool Audio::dataIsEmpty() {
+	return (data.size() == 0);
 }
 
-PaStreamParameters Audio::getOutputParameters() {
-	return inputParameters;
-}
-
-const int Audio::getSampleRate() {
-	return sampleRate;
-}
-
-const int Audio::getFramesPerBuffer() {
-	return framesPerBuffer;
+void Audio::dataFlush() {
+	data.clear();
+	data.resize(0);
 }
 
 void Audio::error(PaError errorCode) {

@@ -1,18 +1,8 @@
 #include "AudioUtil.h"
 
-static const int SAMPLE_SIZE = 4;
-
 AudioUtil::AudioUtil(int channelCount, int sampleRate, int framesPerBuffer)
-	: Audio(channelCount, sampleRate, framesPerBuffer) {
+	: Audio(channelCount, sampleRate, framesPerBuffer) { };
 
-	// initialize information required for libsndfile library
-	memset(&sfinfo, 0, sizeof(sfinfo));
-
-	sfinfo.format = (SF_FORMAT_WAV | SF_FORMAT_FLOAT);
-	sfinfo.channels = channelCount;
-	sfinfo.samplerate = sampleRate;
-
-};
 AudioUtil::~AudioUtil() { };
 
 /* Records audio data from default input device to data vector. 
@@ -26,24 +16,19 @@ AudioUtil::~AudioUtil() { };
  */
 int AudioUtil::record(int seconds) {
 
-	int numBytes = framesPerBuffer * inputParameters.channelCount * SAMPLE_SIZE;
-	float *sampleBlock = (float *) malloc(numBytes);
-
-	memset(sampleBlock, 0.0f, numBytes);
-
 	Audio::startStream();
 	
 	std::cout << "Recording...\n";
-	for (int i=0; i<(seconds*sampleRate)/framesPerBuffer; ++i) {
-		PaError errorCode = Pa_ReadStream(stream, sampleBlock, framesPerBuffer);
-		if (errorCode != paNoError) { error(errorCode); return -1;}
-		
-		float* ptr = sampleBlock;
-		for (int j = 0; j  < framesPerBuffer; ++j) {
-			data.push_back(*ptr);
-			ptr = ptr + 1;
-		}
-	}
+	
+	bool stop = false;
+
+	// Branches off to read stream while main thread waits to stop the function.
+	std::thread read (&Audio::readStream, this, std::ref(stop));
+	std::this_thread::sleep_for (std::chrono::seconds(seconds));
+	stop = true;
+
+	read.join();
+
 	std::cout << "Finished recording.\n";
 	
 	Audio::stopStream();
@@ -94,6 +79,7 @@ int AudioUtil::readWAV(const char* filename) {
 	/* if we've previously wrote a WAV file, data is already loaded. This removes that
 	 * pre-existing data. */
 	if (!dataIsEmpty()) {
+		std::cout << "WARNING: Rewriting data with readWAV() w/o flushing beforehand.\n";
 		dataFlush();
 	}
 
@@ -118,23 +104,3 @@ int AudioUtil::readWAV(const char* filename) {
 	return 0;
 }
 
-/* Used to determine if data member variable has been initialized.
- *
- * PARAMS: None
- *
- * OUTPUTS: None
- *
- * RETURNS: true if data member variable is empty, false if not.
- *
- */
-bool AudioUtil::dataIsEmpty() {
-	if (data.size() == 0) {
-		return true;
-	} return false;
-}
-
-
-void AudioUtil::dataFlush() {
-	data.clear();
-	data.resize(0);
-}
