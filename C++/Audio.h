@@ -1,3 +1,6 @@
+#ifndef AUDIO_H_INCLUDED
+#define AUDIO_H_INCLUDED
+
 #include "portaudio.h"
 
 #include <iostream>
@@ -20,6 +23,9 @@ class Audio {
 		bool dataIsEmpty();
 		void dataFlush();
 		
+		std::vector<float> getAudioData();
+		void setAudioData(std::vector<float>);
+
 		void error(PaError errorCode);
 
 	
@@ -32,3 +38,5 @@ class Audio {
 		PaStream *stream = NULL;
 
 };
+
+#endif

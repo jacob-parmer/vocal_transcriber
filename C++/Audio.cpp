@@ -124,7 +124,14 @@ bool Audio::dataIsEmpty() {
 void Audio::dataFlush() {
 	data.clear();
 	data.resize(0);
+	data.reserve(sampleRate); // reserves 1 second worth of memory for new data
 }
+
+/* Returns the data found in this Audio object.  */
+std::vector<float> Audio::getAudioData() { return this->data; }
+
+/* Sets the Audio object's data to input value. */
+void Audio::setAudioData(std::vector<float> data)  { this->data = data; }
 
 /* Error handling. Called to display errors if something goes wrong with a PortAudio session.
  *
