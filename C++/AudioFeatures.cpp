@@ -8,10 +8,6 @@ AudioFeatures::~AudioFeatures() { };
 /* From data, determine the likely pitch at each sample using the pYIN algorithm.
  * This algorithm uses the source at: https://code.soundsoftware.ac.uk/projects/pyin,
  * which was developed by Matthias Mauch and Simon Dixon at Queen Mary, University of London.
- *
- *
- *
- *
  */
 void AudioFeatures::processPitches() {
 	Yin *y = new Yin(this->framesPerBuffer, this->sampleRate);
@@ -23,11 +19,53 @@ void AudioFeatures::processPitches() {
 
 	double* ptr = dataAsDoubles.data();
 
+	double threshold = 0.02;
 	for (int i=0; i<dataAsDoubles.size(); i++) {
 		Yin::YinOutput output = y->process(ptr);
-		std::cout << output.f0 << "\n";
+		if (isnan(output.f0)) { continue; }
+		Pitch p;
+		std::cout << output.f0;
+		if (output.rms > threshold) {
+			p.f0 = output.f0;
+			p.name = AudioFeatures::getNameFromF0(output.f0);
+			p.rms = output.rms;
+			pitches.push_back(p);
+		} else {
+			p.f0 = 0;
+			p.name = "REST";
+			p.rms = 0;
+			pitches.push_back(p);
+		}
 		ptr = ptr + 1;
+
+	}
+
+	for (Pitch i : pitches) {
+		std::cout << i.name << "\n";
 	}
 	delete y;
 	return;
 }
+
+/* Given fundamental frequency of a signal, determine the melodic note name in 12-tone equal
+ * temperament tuning.
+ *
+ * PARAMS: f0 (double) - fundamental frequency of the signal
+ *
+ * RETURNS: note (std::string) - name of the note, e.g. A4.
+ *
+ */
+std::string AudioFeatures::getNameFromF0(double f0) {
+
+	/* formula for frequency to midi, further information found here:
+	 * https://newt.phys.unsw.edu.au/jw/notes.html */
+	int midi = (int) round(12 * log2(std::abs(f0)/440) + 69);
+
+	// note names (C, D, E, etc.) + Octave (1, 2, 3, etc.)
+	std::string note = NOTE_NAME.at(midi % 12) + std::to_string(int(midi / 12) - 1);
+	
+	return note;	
+
+}
+
+
