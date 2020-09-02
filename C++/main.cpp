@@ -1,5 +1,6 @@
 #include "AudioUtil.h"
 #include "AudioFeatures.h"
+#include "SignalProcessing.h"
 
 int main() {
 
@@ -11,7 +12,12 @@ int main() {
 	AudioUtil* ad = new AudioUtil(channelCount, sampleRate, framesPerBuffer);
 	int err  = ad->record(seconds);
 	err = ad->writeWAV("test.wav");
-
+	
+	Signal sig;
+	double zcr = sig.zeroCrossingRate(ad->getAudioData().data() + 20000, framesPerBuffer);
+	std::cout << zcr << "\n";
+	ad->writeDataToCSV();
+	
 	AudioFeatures* ft = new AudioFeatures(channelCount, sampleRate, framesPerBuffer); 
 	ft->setAudioData(ad->getAudioData());
 	ft->processPitches();

@@ -130,6 +130,16 @@ void Audio::dataFlush() {
 /* Returns the data found in this Audio object.  */
 std::vector<float> Audio::getAudioData() { return this->data; }
 
+/*
+ *
+ *
+ */
+void Audio::writeDataToCSV() {
+	std::ofstream myFile("data.csv");
+	for (int i=0; i<data.size(); i++) {
+		myFile << this->data.at(i) << "\n";
+	}
+}
 /* Sets the Audio object's data to input value. */
 void Audio::setAudioData(std::vector<float> data)  { this->data = data; }
 
