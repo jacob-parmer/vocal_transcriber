@@ -14,7 +14,7 @@ double Signal::zeroCrossingRate(float* in, int frameSize) {
 	
 	int numOfZeroCrosses = 0;
 	for (int t=1; t<frameSize-1; t++) {
-		bool zerocross = Signal::floatSignChange(in[0], in[1]);
+		int zerocross = sgn(in);
 		if (zerocross) { numOfZeroCrosses++; }
 		in++;
 	}	
@@ -22,7 +22,28 @@ double Signal::zeroCrossingRate(float* in, int frameSize) {
 	return (numOfZeroCrosses / (frameSize - 1.0));
 }
 
+/*
+ *
+ *
+ *
+ *
+ *
+ */
+double Signal::meanSquaredError(float* in, int frameSize) {
+	
+	return 0.0;
+}
 
+/*
+ *
+ *
+ *
+ */
+void Signal::FFT(std::vector<float>& data) {
+
+	return;
+
+}
 
 /* For float values, checks if the values of the current float and the next float have different
  * signs. This is useful for checking the zeroCrossingRate.
@@ -33,6 +54,6 @@ double Signal::zeroCrossingRate(float* in, int frameSize) {
  * RETURNS: If sign has changed, return true. If not, return false. *
  *
  */
-bool Signal::floatSignChange(float curr, float next) {
-	return (std::signbit(curr) != std::signbit(next)); 
+template <typename T> int sgn(T val) {
+	return (T(0) < val) - (val < T(0));
 }

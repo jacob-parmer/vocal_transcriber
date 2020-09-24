@@ -1,10 +1,11 @@
 #include "AudioUtil.h"
 #include "AudioFeatures.h"
 #include "SignalProcessing.h"
+#include <fstream>
 
 int main() {
 
-	int seconds = 4;
+	int seconds = 7;
 	const int channelCount = 1;
 	const int sampleRate = 48000;
 	const int framesPerBuffer = 1024;
@@ -14,12 +15,24 @@ int main() {
 	err = ad->writeWAV("test.wav");
 	
 	Signal sig;
-	double zcr = sig.zeroCrossingRate(ad->getAudioData().data() + 20000, framesPerBuffer);
-	std::cout << zcr << "\n";
-	ad->writeDataToCSV();
+	std::vector<double> sigZCR;
+	std::vector<float> audioData = ad->getAudioData();
 	
+	int dataSize = audioData.size();
+	for (int i=0; i<dataSize; i=i+framesPerBuffer) {
+		double frameZCR = sig.zeroCrossingRate(audioData.data() + i, framesPerBuffer);
+		sigZCR.push_back(frameZCR);
+	}
+
+	std::ofstream myFile("testing.csv");
+	for (int j=0; j<sigZCR.size(); j++) {
+		myFile << sigZCR.at(j) << "\n";
+	}
+	myFile.close();
+
 	AudioFeatures* ft = new AudioFeatures(channelCount, sampleRate, framesPerBuffer); 
 	ft->setAudioData(ad->getAudioData());
+
 	ft->processPitches();
 
 	delete ad;

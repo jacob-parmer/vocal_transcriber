@@ -1,0 +1,5 @@
+# All compiled .cpp files
+*.o
+
+# Executables
+*.exec

@@ -1,4 +1,5 @@
 #include "Audio.h"
+#include "SignalProcessing.h"
 
 #include "pyin/Yin.h"
 #include "pyin/YinUtil.h"

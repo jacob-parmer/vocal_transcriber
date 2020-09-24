@@ -7,7 +7,6 @@
 #include <sndfile.h>
 #include <vector>
 #include <cstring>
-#include <fstream>
 
 class AudioUtil;
 class AudioFeatures;
@@ -27,7 +26,7 @@ class Audio {
 		
 		std::vector<float> getAudioData();
 		void setAudioData(std::vector<float>);
-		void writeDataToCSV();
+
 		void error(PaError errorCode);
 
 	

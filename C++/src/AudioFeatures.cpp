@@ -8,6 +8,10 @@ AudioFeatures::~AudioFeatures() { };
 /* From data, determine the likely pitch at each sample using the pYIN algorithm.
  * This algorithm uses the source at: https://code.soundsoftware.ac.uk/projects/pyin,
  * which was developed by Matthias Mauch and Simon Dixon at Queen Mary, University of London.
+ *
+ * OUTPUTS: pitches (std::vector<Pitch>) - The pitch at the given datapoint, as determined by
+ * 					   the YIN algorithm's detected fundamental frequency
+ * 	   
  */
 void AudioFeatures::processPitches() {
 	Yin *y = new Yin(this->framesPerBuffer, this->sampleRate);
@@ -16,15 +20,22 @@ void AudioFeatures::processPitches() {
 	// Unfortunately, doubles are not a supported type from PortAudio, so we just make a copy
 	// in memory of the data vector, but with doubles instead of floats to be able to process.
 	std::vector<double> dataAsDoubles(data.begin(), data.end());
-
 	double* ptr = dataAsDoubles.data();
 
+	int dataSize = dataAsDoubles.size();
+
+	for (int j=0; j<dataSize; j++) {
+		std::cout << dataAsDoubles.at(j) << "\n";
+	}
+
+	std::cout << dataSize;
+
 	double threshold = 0.02;
-	for (int i=0; i<dataAsDoubles.size(); i++) {
+	for (int i=0; i<dataSize; i++) {
 		Yin::YinOutput output = y->process(ptr);
 		if (isnan(output.f0)) { continue; }
 		Pitch p;
-		std::cout << output.f0;
+		std::cout << output.f0 << "\n";
 		if (output.rms > threshold) {
 			p.f0 = output.f0;
 			p.name = AudioFeatures::getNameFromF0(output.f0);
@@ -40,11 +51,12 @@ void AudioFeatures::processPitches() {
 
 	}
 
+	std::cout << "Here: " << pitches.size() << "\n";
 	for (Pitch i : pitches) {
 		std::cout << i.name << "\n";
 	}
+
 	delete y;
-	return;
 }
 
 /* Given fundamental frequency of a signal, determine the melodic note name in 12-tone equal
