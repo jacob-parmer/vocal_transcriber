@@ -3,3 +3,8 @@
 
 # Executables
 *.exec
+
+# vim temp files
+*.swp
+*.swo
+*.swn
