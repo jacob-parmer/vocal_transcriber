@@ -33,8 +33,6 @@ int main() {
 	AudioFeatures* ft = new AudioFeatures(channelCount, sampleRate, framesPerBuffer); 
 	ft->setAudioData(ad->getAudioData());
 
-	ft->processPitches();
-
 	delete ad;
 	delete ft;
 }

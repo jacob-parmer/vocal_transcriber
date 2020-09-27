@@ -1,7 +1,5 @@
 #include "Audio.h"
 
-#include "portaudio.h"
-
 static const PaSampleFormat SAMPLE_FORMAT = paFloat32;
 static const int SAMPLE_SIZE = 4; // 32 bit samples, 4 bytes
 
