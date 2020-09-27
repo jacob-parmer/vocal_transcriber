@@ -13,6 +13,7 @@ AudioFeatures::~AudioFeatures() { };
  * 					   the YIN algorithm's detected fundamental frequency
  * 	   
  */
+/*
 void AudioFeatures::processPitches() {
 	Yin *y = new Yin(this->framesPerBuffer, this->sampleRate);
 	
@@ -58,6 +59,7 @@ void AudioFeatures::processPitches() {
 
 	delete y;
 }
+*/
 
 /* Given fundamental frequency of a signal, determine the melodic note name in 12-tone equal
  * temperament tuning.
