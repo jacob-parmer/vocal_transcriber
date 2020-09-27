@@ -2,9 +2,8 @@
 #define AUDIO_H_INCLUDED
 
 #include "portaudio.h"
-
+#include "sndfile.h"
 #include <iostream>
-#include <sndfile.h>
 #include <vector>
 #include <cstring>
 
