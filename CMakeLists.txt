@@ -29,17 +29,17 @@ ExternalProject_Add_Step(project_libsndfile autogen
 
 ExternalProject_Get_Property(project_libsndfile BINARY_DIR)
 set(libsndfile_lib_dir "${BINARY_DIR}/src/.libs")
-set(libsndfile_inc_dir "${BINARY_DIR}/src")
+set(libsndfile_inc_dir "${BINARY_DIR}/include")
 
 add_library(libsndfile STATIC IMPORTED)
 set_property(TARGET libsndfile PROPERTY
 	IMPORTED_LOCATION ${libsndfile_lib_dir}/libsndfile.a)
 
-set(LIBSNDFILE_INCLUDE_PATH "${install_dir}/src/project_libsndfile-build/src/")
+set(LIBSNDFILE_INCLUDE_PATH "${install_dir}/src/project_libsndfile-build/src/.libs/")
 
+# Adds portaudio library
 ExternalProject_Add(project_portaudio
-	SVN_REPOSITORY        https://subversion.assembla.com/svn/portaudio/portaudio/trunk
-	SVN_TRUST_CERT        1
+	GIT_REPOSITORY        https://github.com/PortAudio/portaudio.git
 	PREFIX                lib/portaudio
 	CONFIGURE_COMMAND     <SOURCE_DIR>/configure
 	BUILD_IN_SOURCE       1
@@ -56,17 +56,7 @@ add_library(portaudio STATIC IMPORTED)
 set_property(TARGET portaudio PROPERTY
 	IMPORTED_LOCATION "${portaudio_lib_dir}/libportaudio.a")
 
-if(APPLE)
-    find_library(CORE_AUDIO_LIBRARY CoreAudio)
-    find_library(AUDIO_TOOLBOX_LIBRARY AudioToolbox)
-    find_library(AUDIO_UNIT_LIBRARY AudioUnit)
-    find_library(CARBON_LIBRARY Carbon)
-    set(EXTRA_LIBS ${CORE_AUDIO_LIBRARY} ${AUDIO_TOOLBOX_LIBRARY} ${AUDIO_UNIT_LIBRARY} ${CARBON_LIBRARY})
-endif(APPLE)
-
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-	set(EXTRA_LIBS rt asound jack pthread)
-endif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+set(EXTRA_LIBS rt asound jack pthread)
 
 add_library(helper_files STATIC
 	src/Audio.cpp
@@ -78,22 +68,18 @@ add_library(helper_files STATIC
 target_include_directories(helper_files
 	PUBLIC
 	    ${PROJECT_SOURCE_DIR}/include
-	    ${PROJECT_SOURCE_DIR}/lib
 )
 
-include_directories(include ${libsndfile_inc_dir} ${portaudio_inc_dir})
+include_directories(include ${libsndfile_inc_dir} ${portaudio_inc_dir} ${pyin_inc_dir})
 
 add_executable(vocal_transcriber
-       src/main.cpp
-)
+	src/main.cpp
+)	
 
 set_target_properties(vocal_transcriber
 	PROPERTIES
 	CXX_STANDARD 17)
 
-target_link_libraries(vocal_transcriber ${EXTRA_LIBS} libsndfile portaudio helper_files)
-
-
-
+target_link_libraries(vocal_transcriber helper_files libsndfile portaudio ${EXTRA_LIBS})
 
 
