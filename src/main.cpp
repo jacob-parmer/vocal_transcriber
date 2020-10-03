@@ -24,15 +24,8 @@ int main() {
 		sigZCR.push_back(frameZCR);
 	}
 
-	std::ofstream myFile("testing.csv");
-	for (int j=0; j<sigZCR.size(); j++) {
-		myFile << sigZCR.at(j) << "\n";
-	}
-	myFile.close();
 
-	AudioFeatures* ft = new AudioFeatures(channelCount, sampleRate, framesPerBuffer); 
-	ft->setAudioData(ad->getAudioData());
+	std::cout << "Testing123";
 
 	delete ad;
-	delete ft;
 }
