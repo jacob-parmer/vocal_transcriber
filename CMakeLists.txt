@@ -28,12 +28,11 @@ ExternalProject_Add_Step(project_libsndfile autogen
 )
 
 ExternalProject_Get_Property(project_libsndfile BINARY_DIR)
-set(libsndfile_lib_dir "${BINARY_DIR}/src/.libs")
-set(libsndfile_inc_dir "${BINARY_DIR}/include")
+set(libsndfile_lib_dir "${BINARY_DIR}/src/.libs" CACHE 
+	PATH "Path to libsndfile lib" FORCE)
 
-add_library(libsndfile STATIC IMPORTED)
-set_property(TARGET libsndfile PROPERTY
-	IMPORTED_LOCATION ${libsndfile_lib_dir}/libsndfile.a)
+set(libsndfile_inc_dir "${BINARY_DIR}/include" CACHE
+	PATH "Path to libsndfile headers" FORCE)
 
 set(LIBSNDFILE_INCLUDE_PATH "${install_dir}/src/project_libsndfile-build/src/.libs/")
 
@@ -52,34 +51,9 @@ ExternalProject_Get_Property(project_portaudio SOURCE_DIR)
 set(portaudio_lib_dir "${BINARY_DIR}/lib/.libs")
 set(portaudio_inc_dir "${SOURCE_DIR}/include")
 
-add_library(portaudio STATIC IMPORTED)
-set_property(TARGET portaudio PROPERTY
-	IMPORTED_LOCATION "${portaudio_lib_dir}/libportaudio.a")
+# Creates subdirectory for building project and building tests
+add_subdirectory(src)
+add_subdirectory(test)
 
-set(EXTRA_LIBS rt asound jack pthread)
-
-add_library(helper_files STATIC
-	src/Audio.cpp
-	src/AudioUtil.cpp
-	src/AudioFeatures.cpp
-	src/SignalProcessing.cpp
-)
-
-target_include_directories(helper_files
-	PUBLIC
-	    ${PROJECT_SOURCE_DIR}/include
-)
-
-include_directories(include ${libsndfile_inc_dir} ${portaudio_inc_dir} ${pyin_inc_dir})
-
-add_executable(vocal_transcriber
-	src/main.cpp
-)	
-
-set_target_properties(vocal_transcriber
-	PROPERTIES
-	CXX_STANDARD 17)
-
-target_link_libraries(vocal_transcriber helper_files libsndfile portaudio ${EXTRA_LIBS})
 
 
