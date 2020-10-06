@@ -4,18 +4,31 @@
 
 #include <boost/test/unit_test.hpp>
 #include "SignalProcessing.h"
-#include <iostream>
 
+
+BOOST_AUTO_TEST_CASE (sign)
+{
+
+	int pos = 5;
+	int posSign = sgn(pos);
+	BOOST_CHECK(posSign == 1);
+
+	int neg = -5;
+	int negSign = sgn(neg);
+
+	BOOST_CHECK(negSign == -1);
+
+}	
 
 BOOST_AUTO_TEST_CASE (zeroCrossingRate)
 {
 
-	float exampleFrame [8] = {-1, 1, -1, 1, -1, 1, -1, 1};
-	int frameSize = 8;
+	float exampleFrame [10] = {-1, 1, 1, -1, 1, 1, -1, 1, 1, -1};
+	int frameSize = 10;
 	float *ptr = exampleFrame;
 
-	std::cout << Signal::zeroCrossingRate(ptr, frameSize);
-
-	BOOST_CHECK(Signal::zeroCrossingRate(ptr, frameSize) == 1);
+	double zcr = Signal::zeroCrossingRate(ptr, frameSize);
+	BOOST_CHECK(zcr == 0.6);
+	
 }	
 
