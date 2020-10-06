@@ -6,6 +6,7 @@
 #include <complex>
 #include <vector>
 #include <valarray>
+
 const double PI = 3.141592653589793238460;
 
 class Signal {
@@ -17,5 +18,11 @@ class Signal {
 
 };
 
-template <typename T> int sgn(T val);
+template <class T> int sgn(T val ) 
+{
+	int out;
+	(val < 0) ? out = -1 : out = 1;
+	return out;
+}	
+
 #endif

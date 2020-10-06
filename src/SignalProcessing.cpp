@@ -1,7 +1,8 @@
 #include "SignalProcessing.h"
 
-/* Returns the zero crossing rate of a frame. More information about zero-crossing rate can be
- * found here: https://en.wikipedia.org/wiki/Zero-crossing_rate
+/* Returns the zero crossing rate of a frame. The formula for this was found in the paper:
+ * "Separation of voiced and unvoiced using Zero Crossing Rate and Energy of the speech signal"
+ * by authors Bachu R.G., Kopparthi S., Adapa B., and Barkana B.D.
  *
  * PARAMS: in (float*) - pointer to the first element in a frame
  * 	   frameSize (int) - size of the frame
@@ -12,14 +13,19 @@
  */
 double Signal::zeroCrossingRate(float* in, int frameSize) {
 	
-	int numOfZeroCrosses = 0;
-	for (int t=1; t<frameSize-1; t++) {
-		int zerocross = sgn(in);
-		if (zerocross) { numOfZeroCrosses++; }
-		in++;
+	double zcr = 0;
+	for (int n=0; n<(frameSize - 1); n++) {
+		int sgn1 = sgn(*(in + 1));
+		int sgn2 = sgn(*in);
+
+		double zc = std::abs(sgn1 - sgn2);
+		zc = zc / (2 * frameSize);
+		zcr += zc;
+		
+		in += 1; 
 	}	
 
-	return (numOfZeroCrosses / (frameSize - 1.0));
+	return zcr;
 }
 
 /*
@@ -45,15 +51,3 @@ void Signal::FFT(std::vector<float>& data) {
 
 }
 
-/* For float values, checks if the values of the current float and the next float have different
- * signs. This is useful for checking the zeroCrossingRate.
- *
- * PARAMS: curr (float) - current float item
- * 	   next (float) - next float item
- *
- * RETURNS: If sign has changed, return true. If not, return false. *
- *
- */
-template <typename T> int sgn(T val) {
-	return (T(0) < val) - (val < T(0));
-}
