@@ -18,11 +18,11 @@ foreach(testSrc ${TEST_SRCS})
 	target_link_libraries(${testName} ${Boost_LIBRARIES} helper_files ${EXTRA_LIBS})
 
 	set_target_properties(${testName} PROPERTIES
-		RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/testBin)
+		RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/build/test)
 
 	add_test(NAME ${testName}
-		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/testBin
-		COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/testBin/${testName})
+		WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/build/test
+		COMMAND ${CMAKE_SOURCE_DIR}/build/test/${testName})
 
 endforeach(testSrc)
 
